@@ -42,7 +42,6 @@ migrate = Migrate(app, db)
 
 @app.route('/')
 def get_data():
-    print(os.environ)
     api_url = 'https://datamall2.mytransport.sg/ltaodataservice/PCDRealTime'
 
     line_codes = [
