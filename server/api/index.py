@@ -1,6 +1,9 @@
 from flask import Flask, jsonify
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import insert
 import requests
 import os
 from datetime import datetime
@@ -23,6 +26,10 @@ class Congestion(db.Model):
     end_time = db.Column(db.Text, nullable=False)
     crowd_level = db.Column(db.Text, nullable=False)
 
+    __table_args__ = (
+        UniqueConstraint('station', 'start_time', 'end_time', name='uq_station_time'),
+    )
+
 # Model for the 'logs' table
 class Log(db.Model):
     __tablename__ = 'logs'
@@ -30,6 +37,8 @@ class Log(db.Model):
     params = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=func.now())
     log = db.Column(db.Text, nullable=False)
+
+migrate = Migrate(app, db)
 
 @app.route('/')
 def get_data():
@@ -74,13 +83,20 @@ def process_line(url: str, line_code: str):
         for i, row in enumerate(rows):
             if not row['Station'] or not row['StartTime'] or not row['EndTime'] or not row['CrowdLevel']:
                 raise Exception(f'Unexpected shape at idx: {i}' + json.dumps(json_data))
-            e = Congestion(
+            insert_stmt = insert(Congestion).values(
                 station=row['Station'],
                 start_time = row['StartTime'],
                 end_time = row['EndTime'],
                 crowd_level=row['CrowdLevel']
             )
-            db.session.add(e)
+            do_update_stmt = insert_stmt.on_conflict_do_update(
+                index_elements=['station', 'start_time', 'end_time'],
+                set_={
+                    'crowd_level': insert_stmt.excluded.crowd_level,
+                    'created_at': func.now()
+                }
+            )            
+            db.session.execute(do_update_stmt)
         print(f'Success: {line_code}')
     except requests.RequestException as e:
         print(f'Error: {line_code} ' + str(e))
