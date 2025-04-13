@@ -22,7 +22,7 @@ for file in csv_files:
     parent_dir = os.path.basename(os.path.dirname(file))
     date_str = parent_dir  # e.g., "11-apr"
     
-    # Parse the date using a fixed year (e.g., 2023) to compute day information
+    # Parse the date using a fixed year (e.g., 2025) to compute day information
     try:
         dt = datetime.datetime.strptime(date_str.title() + "-2025", "%d-%b-%Y")
         day_of_week = dt.strftime("%A")  # e.g., "Friday"
