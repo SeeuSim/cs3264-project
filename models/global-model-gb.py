@@ -67,7 +67,7 @@ def train_model(paths: list[str]):
 
 
 if __name__ == "__main__":
-    days = list(map(lambda d: f"{d}-apr", list(range(11, 13 + 1))))
+    days = list(map(lambda d: f"{d}-apr", list(range(11, 18 + 1))))
 
     data_paths = [path.abspath(path.join("..", "data", d, "_global.csv")) for d in days]
 
