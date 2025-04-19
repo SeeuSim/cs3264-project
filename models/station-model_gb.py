@@ -10,7 +10,7 @@ from sklearn.metrics import classification_report, accuracy_score
 from sklearn.ensemble import GradientBoostingClassifier
 
 # Data Loading and Combination
-file_pattern = os.path.join('.', 'data', '*-apr', '_global.csv')
+file_pattern = os.path.join('..', 'data', '*-apr', '_global.csv')
 csv_files = glob.glob(file_pattern)
 
 list_df = []
